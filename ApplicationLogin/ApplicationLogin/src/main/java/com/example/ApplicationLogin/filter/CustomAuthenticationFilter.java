@@ -43,42 +43,38 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         @Override
         public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-
-            //Code for removing the null username and password
+            //THE CODE FOR GETTING USERNAME AND PASSWORD
+            StringBuilder sab = new StringBuilder();
             try {
-                //Reading the requested body
                 BufferedReader reader = request.getReader();
-                StringBuilder sb = new StringBuilder();
+                reader.mark(10000);
+
                 String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
+                do {
+                    line = reader.readLine();
+                    sab.append(line).append("\n");
+                } while (line != null);
+                reader.reset();
+                // do NOT close the reader here, or you won't be able to get the post data twice
+            } catch(IOException e) {
+                logger.warn("getPostData couldn't.. get the post data", e);  // This has happened if the request's reader is closed
+            }
 
-                // Convert the request body to a JSON object
-                String json = sb.toString();
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, String> map = mapper.readValue(json, Map.class);
+            String string = sab.toString();
 
-                // Get the username and password from the JSON object
-                String username = map.get("username");
-                String password = map.get("password");
-
-                log.info("Username is: {}", username);
-                log.info("Password is: {}", password);
+            //TO GET THE USERNAME AND PASSWORD REQUEST
 
 
-//            String username = request.getParameter("username");
-//            String password = request.getParameter("password");
-//            log.info("Username is: {}", username);
-//            log.info("Password is: {}", password);
+            String username = request.getParameter("username");
+            String password = request.getParameter("password");
+            log.info("Username is: {}", username);
+            log.info("Password is: {}", password);
 
                 //object for token
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
                 return authenticationManager.authenticate(authenticationToken);
 
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+
         }
 
 
@@ -95,7 +91,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
             String access_token = JWT.create()
                     .withSubject(user.getUsername())
                     .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
-                    .withIssuer(request.getRequestURL().toString())
+                    .withIssuer(request.getRequestURI().toString())
                     .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                     .sign(algorithm);
 
