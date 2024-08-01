@@ -1,4 +1,7 @@
 package com.example.ApplicationLogin.LoginController;
+
+//ALL IMPORTS FOR LOGINCONTROLLER , TI IS THE MAIN CLASS
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -37,7 +40,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 @RestController
 @CrossOrigin
 @RequestMapping("api/v1/user")
-public class LoginController<LoginMessage> {
+public class LoginController {
 
     @Autowired
     private LoginService loginService;
@@ -63,9 +66,17 @@ public class LoginController<LoginMessage> {
   
 
     //Have put user
-    @GetMapping("/user")
+
+//THIS IS CHATGPT CODE
+
+
+
+
+
+    @GetMapping("/user/login")
     public ResponseEntity<List<User>> getUsers(){
-        return ResponseEntity.created(null).body(loginService.getUsers());
+        //here needs to provide an address for URI
+        return ResponseEntity.created(URI.create("/api/v1/user/login")).body(loginService.getUsers());
     }
 
     @PostMapping("/user/save")
@@ -97,7 +108,7 @@ public class LoginController<LoginMessage> {
 
         if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
 
-            //This is thr try block where everything will be present
+            //This is the try block where everything will be present
             try {
                 String refresh_token  = authorizationHeader.substring("Bearer ".length()); //here we are removing the space
                 Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
@@ -172,8 +183,6 @@ class RoleToUserForm{
     public String getRoleName() {
         return roleName;
     }
-
-
 
 
 }
